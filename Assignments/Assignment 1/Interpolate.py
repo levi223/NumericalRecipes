@@ -37,8 +37,7 @@ class interpol():
             
         if min(finallist) < 0:
             finallist = np.array(finallist) + min(finallist)
-        
-        
+    
         return finallist
         
         
@@ -52,7 +51,3 @@ class interpol():
                 print("Overflow error happened")
                 print(f"{e}, {e.__class__}")
         
-        #cubic spline
-        if method == "CubicSpline":
-            neighbours = self.neighbours(x,4)
-            return self.CubicSpline(x, neighbours)
