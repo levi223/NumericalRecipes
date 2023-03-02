@@ -56,8 +56,3 @@ class interpol():
         if method == "CubicSpline":
             neighbours = self.neighbours(x,4)
             return self.CubicSpline(x, neighbours)
-        """
-            except (IndexError, ValueError) as e:
-                print("Overflow error happened")
-                print(f"{e}, {e.__class__}")
-        """

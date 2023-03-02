@@ -1,27 +1,6 @@
 import numpy as np
 
-
 class LinalgSolve():
-    
-    def croutdecomp1(self,A):
-    #initialize U and L
-        n = np.shape(A)[0]
-        L = np.zeros((n,n))
-        U = np.eye(n)
-        A = np.array(A)
-        
-        for j in range(n): #loop over columns but not the first one
-            
-            # the following calculations have been vectorized from a original double loop
-            #computing the lower value L
-            sum = L[j,:j] @ U [:j,j]  # slices of the column in U above the evaluated point and dot products it with a slice in L left of the evaluated point
-            L[j:,j] = A[j:,j] - sum 
-            
-            #computing the upper value U
-            sum = L[j,:j] @ U [:j,j]
-            U[j,j:] = (A[j][j:] - sum) / L[j][j]
-        return L,U
-    
     
     def croutdecomp(self,A):
         #initialize U and L
@@ -31,23 +10,13 @@ class LinalgSolve():
         A = np.array(A)
         
         for j in range(0,n): #loop over columns but not the first one
-            
-            #computing the lower value L
-            for i in range(j,n): # loop over all rows below the diagonal
-                
-                
-                sum = 0 
-                for k in range(0,j):
-                    sum += L[i,k] * U [k,j] #calculating the
-                L[i,j] = A[i,j] - sum
-                
+            #computing the lower value L# loop over all rows below the diagonal
+            sum =  L[j:,:j] @ U [:j,j] #calculating the
+            L[j:,j] = A[j:,j] - sum
+
             #computing the upper value U
-            for i in range(j,n):
-                sum = 0 
-                for k in range(0,j):
-                    sum += L[j,k] * U [k,i]
-                
-                U[j][i] = (A[j][i] - sum) / L[j][j]
+            sum = L[j,:j] @ U [:j,j:] 
+            U[j][j:] = (A[j][j:] - sum) / L[j][j]
 
         return np.array(L), np.array(U)
     
@@ -61,9 +30,9 @@ class LinalgSolve():
     
     def forward_sub(self,L,b):
         n = len(b)
-        y= np.zeros(n)#empty copied array
+        y = np.array(b).copy()
         for i in range(n): # iterate over common shape
-            y[i] = b[i] # setting new array values to be same as b
+                 # setting new array values to be same as b
             for j in range(i): # iterating over all values under the 
                 y[i]=y[i]-(L[i,j]*y[j])
             y[i]=y[i]/L[i,i]
@@ -83,7 +52,19 @@ class LinalgSolve():
     
     
     def CroutSolve(self):
-        #first calc LY = B
         Y = self.forward_sub(self.L, self.b)
         X = self.backward_sub(self.U,Y)
         return X
+    
+    def CroutSolveIterative(self, iterations):
+        solution = self.CroutSolve()
+        b = self.b.copy()
+        for i in range(1,iterations):
+            db = self.A @ solution - b
+            intermediate = self.forward_sub(self.L, db)
+            dx = self.backward_sub(self.U,intermediate)
+            solution -=dx
+        return solution
+           
+            
+        
