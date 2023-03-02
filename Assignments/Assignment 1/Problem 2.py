@@ -11,35 +11,45 @@ def lagrangepolynomial(x, coeff):
         lagrangepoly += ele * x **num
     return lagrangepoly
 
+timeititerN = 1000
+
 #import data
 vander = VDM("Vandermonde.txt")
-
-#calculate interpolated values using LU
-
-
 vander = VDM("Vandermonde.txt")
 vandersolve=  LinalgSolve(vander.A, vander.y)
-
-start= time.time()
-solutionCrout = vandersolve.CroutSolve()
 x_eval_points = np.linspace(min(vander.x),max(vander.x),1000)
-interpolated_values_LU = lagrangepolynomial(x_eval_points,solutionCrout) #Lu values
-print("Time to run LU decomp interpolater 1x: ",time.time() - start)
-interpolated_values_LU_error = np.subtract(lagrangepolynomial(vander.x,solutionCrout),vander.y) #difference in values
+
+#measure runtime - interpolated singularly iterated LU decomp
+Crout1xruntime = []
+for i in range(timeititerN):
+    start= time.time()
+    solutionCrout = vandersolve.CroutSolve()
+    interpolated_values_LU = lagrangepolynomial(x_eval_points,solutionCrout) #Lu values
+    Crout1xruntime.append(time.time() - start)
+    interpolated_values_LU_error = np.subtract(lagrangepolynomial(vander.x,solutionCrout),vander.y) #difference in values
+print("Average time to run LU decomp interpolater 1x: ",np.average(Crout1xruntime))
 
 
-#calculate interpolated values using iterative LU
-start=  time.time()
-solutionitertaiveCrout = vandersolve.CroutSolveIterative(iterations=10)
-interpolated_values_iterative_LU =lagrangepolynomial(x_eval_points,solutionitertaiveCrout)
-print("Time to run LU decomp interpolater 10xx: ", time.time() - start)
-interpolated_values_iterative_LU_error = np.subtract(lagrangepolynomial(vander.x,solutionCrout),vander.y) #difference in values
+#measure runtime -  interpolated 10x iterated LU decomp
+Crout10xruntime =[]
+for i in range(timeititerN):
+    start= time.time()
+    solutionitertaiveCrout = vandersolve.CroutSolveIterative(iterations=10)
+    interpolated_values_iterative_LU =lagrangepolynomial(x_eval_points,solutionitertaiveCrout)
+    Crout10xruntime.append(time.time() - start)
+    interpolated_values_iterative_LU_error = np.subtract(lagrangepolynomial(vander.x,solutionCrout),vander.y) #difference in values
+print("Average time to run LU decomp interpolater 10x: ",np.average(Crout10xruntime))
 
-#calculate interpolated values using Neville
-start=  time.time()
-interpolated_values_Neville = [interpol(vander.x, vander.y).interpolate(i,method="neville") for i in x_eval_points]
-interpolated_values_Neville_error = np.subtract([interpol(vander.x, vander.y).interpolate(i,method="neville") for i in vander.x],vander.y) #difference in values
-print("Time to run Neville interpolater: ", time.time() - start)
+
+
+#measure runtime - Neville interpolation
+Nevilleruntime = []
+for i in range(timeititerN):
+    start=  time.time()
+    interpolated_values_Neville = [interpol(vander.x, vander.y).interpolate(i,method="neville") for i in x_eval_points]
+    interpolated_values_Neville_error = np.subtract([interpol(vander.x, vander.y).interpolate(i,method="neville") for i in vander.x],vander.y) #difference in values
+    Nevilleruntime.append(time.time() - start)
+print("Time to run Neville interpolater: ", np.average(Nevilleruntime))
 
 
 #plot data
