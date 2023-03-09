@@ -76,6 +76,7 @@ ax[1].legend()
 ax[1].set_xlabel('$x$')
 ax[1].set_ylabel('$y error$')
 ax[1].set_title("Interpolation Error")
+plt.imsave("/Output/assignment2plot.jpg")
 plt.show()
 
 
